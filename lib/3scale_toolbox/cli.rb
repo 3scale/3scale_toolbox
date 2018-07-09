@@ -10,16 +10,15 @@ class ThreeScaleToolbox::Runner
   end
 
   def root_command
+    basic_command.tap { |command| command.add_command Cri::Command.new_basic_help }
+  end
+
+  def basic_command
     Cri::Command.define do
       name        '3scale'
       usage       '3scale <command> [options]'
       summary     '3scale CLI Toolbox'
       description '3scale CLI tools to manage your API from the terminal.'
-
-      flag :h, :help, 'show help for this command' do |_, cmd|
-        puts cmd.help
-        exit 0
-      end
 
       flag :v, :version, 'Prints the version of this command' do |_, _|
         puts ThreeScaleToolbox::VERSION
