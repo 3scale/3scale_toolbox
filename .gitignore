@@ -5,6 +5,7 @@
 /coverage/
 /doc/
 /pkg/
+/vendor/
 /spec/reports/
 /tmp/
 .DS_Store
