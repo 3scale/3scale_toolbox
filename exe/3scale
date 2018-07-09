@@ -1,14 +1,8 @@
 #!/usr/bin/env ruby
 
+require '3scale_toolbox'
 require '3scale_toolbox/cli'
 
-options, argv = ThreeScaleToolbox::CLI.parse
+args = ARGV.clone
 
-unless options.command
-  puts 'Available subcommands: '
-  puts ThreeScaleToolbox::CLI.subcommands
-  puts
-  ThreeScaleToolbox::CLI.print_help!
-end
-
-exec options.command.full_path, *ARGV
+ThreeScaleToolbox::Runner.new.run args

@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-
-require '3scale_toolbox/cli'
-
-puts '3scale toolbox help'
-puts
-
-puts 'Available subcommands: '
-puts ThreeScaleToolbox::CLI.subcommands.map(&:name)
