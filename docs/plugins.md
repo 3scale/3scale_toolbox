@@ -51,9 +51,27 @@ OPTIONS
     -h --help         show help for this command
 
 OPTIONS FOR 3SCALE
-    -h --help         show help for this command
     -v --version      Prints the version of this command
+```
 
+Your plugin help is also available using builtin *help* command
+
+```
+$ RUBYOPT=-Ilib 3scale help foo
+NAME
+    foo - foo command
+
+USAGE
+    3scale foo [options]
+
+DESCRIPTION
+    This command does a lot of stuff.
+
+OPTIONS
+    -h --help         show help for this command
+
+OPTIONS FOR 3SCALE
+    -v --version      Prints the version of this command
 ```
 
 Now, package your plugin as a [gem](https://guides.rubygems.org/make-your-own-gem/) and let us know about it.
