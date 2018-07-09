@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.name          = '3scale_toolbox'
   spec.version       = ThreeScaleToolbox::VERSION
   spec.licenses      = ['MIT']
-  spec.authors       = ['Michal Cichra']
-  spec.email         = ['michal@3scale.net']
+  spec.authors       = ['Michal Cichra', 'Eguzki Astiz Lezaun']
+  spec.email         = ['michal@3scale.net', 'eastizle@redhat.com']
 
   spec.summary       = %q{3scale CLI Toolbox.}
   spec.description   = %q{3scale CLI tools to manage your API from the terminal.}
@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.required_ruby_version = '>= 2.1'
 
-  spec.add_dependency '3scale-api', '~> 0.1.2'
+  spec.add_dependency '3scale-api', '~> 0.1'
+  spec.add_dependency 'cri', '~> 2.10'
 end
