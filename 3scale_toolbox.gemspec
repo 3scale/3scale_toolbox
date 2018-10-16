@@ -15,6 +15,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/3scale/3scale_toolbox'
 
   spec.files         = Dir['{lib}/**/*.rb'] + %w[README.md] + Dir['exe/*']
+  # Gemfile* and gemspec are included here to support
+  # running Bundler at gem install time.
+  spec.files         << 'Gemfile'
+  spec.files         << 'Gemfile.lock'
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
