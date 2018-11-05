@@ -1,4 +1,5 @@
 require 'cri'
+require '3scale/api'
 require '3scale_toolbox/base_command'
 
 module ThreeScaleToolbox
@@ -6,6 +7,20 @@ module ThreeScaleToolbox
     module CopyCommand
       class CopyServiceSubcommand < Cri::CommandRunner
         include ThreeScaleToolbox::Command
+        include ThreeScaleToolbox::Remotes
+
+        attr_reader :source, :destination, :system_name, :service_id,
+                    :source_remote, :copy_remote,
+                    :source_service, :copy_service,
+                    :source_proxy,
+                    :source_metrics, :copy_metrics,
+                    :source_methods, :copy_methods,
+                    :source_hits, :copy_hits,
+                    :source_plans, :copy_plans,
+                    :source_mapping_rules, :copy_mapping_rules,
+                    :metrics_mapping,
+                    :application_plan_mapping
+
         def self.command
           Cri::Command.define do
             name        'service'
@@ -23,25 +38,24 @@ module ThreeScaleToolbox
         end
 
         def run
-          source      = fetch_required_option(:source)
-          destination = fetch_required_option(:destination)
-          system_name = fetch_required_option(:target_system_name)
+          @source      = fetch_required_option(:source)
+          @destination = fetch_required_option(:destination)
+          @system_name = fetch_required_option(:target_system_name)
+          @service_id = arguments[:service_id]
 
-          copy_service(arguments[:service_id], source, destination, system_name)
+          process
         end
 
-        def compare_hashes(first, second, keys)
-          keys.map{ |key| first.fetch(key) } == keys.map{ |key| second.fetch(key) }
+        private
+
+        def create_remotes
+          @source_remote = get_remote source
+          @copy_remote = get_remote destination
         end
 
-        def provider_key_from_url(url)
-          url[/\w*@/][0..-2]
+        def fetch_source_service
+          @source_service = source_remote.show_service service_id
         end
-
-        def endpoint_from_url(url)
-          url.sub /\w*@/, ''
-        end
-
 
         # Returns new hash object with not nil valid params
         def filter_params(valid_params, source)
@@ -50,155 +64,236 @@ module ThreeScaleToolbox
           end
         end
 
-        def copy_service_params(original, system_name)
-          service_params = filter_params(Commands.service_valid_params, original)
+        def copy_service_params
+          service_params = filter_params(Commands.service_valid_params,
+                                         source_service)
           service_params.tap do |hash|
             hash['system_name'] = system_name if system_name
           end
         end
 
-        def copy_service(service_id, source, destination, system_name)
-          require '3scale/api'
+        def copy_service_id
+          copy_service.fetch('id')
+        end
 
-          source_client = ThreeScale::API.new(
-            endpoint:     endpoint_from_url(source),
-            provider_key: provider_key_from_url(source),
-            verify_ssl: verify_ssl
-          )
-          client = ThreeScale::API.new(
-            endpoint:     endpoint_from_url(destination),
-            provider_key: provider_key_from_url(destination),
-            verify_ssl: verify_ssl
-          )
+        def create_service
+          @copy_service = copy_remote.create_service copy_service_params
+          errors = copy_service['errors']
 
-          service = source_client.show_service(service_id)
-          copy    = client.create_service(copy_service_params(service, system_name))
+          raise "Service has not been saved. Errors: #{errors}" unless errors.nil?
+          puts "new service id #{copy_service_id}"
+        end
 
-          raise "Service has not been saved. Errors: #{copy['errors']}" unless copy['errors'].nil?
+        def fetch_source_proxy_settings
+          @source_proxy = source_remote.show_proxy(service_id)
+        end
 
-          service_copy_id = copy.fetch('id')
+        def create_proxy_settings
+          copy_remote.update_proxy(copy_service_id, source_proxy)
+          puts "updated proxy of #{copy_service_id} to match the original"
+        end
 
-          puts "new service id #{service_copy_id}"
+        def fetch_source_metrics_methods
+          @source_metrics = source_remote.list_metrics(service_id)
+          @source_hits = source_metrics.find { |metric| metric['system_name'] == 'hits' } or raise 'missing hits metric'
+          @source_methods = source_remote.list_methods(service_id, source_hits['id'])
+          puts "original service hits metric #{source_hits['id']} has #{source_methods.size} methods"
+        end
 
-          proxy = source_client.show_proxy(service_id)
-          client.update_proxy(service_copy_id, proxy)
-          puts "updated proxy of #{service_copy_id} to match the original"
+        def fetch_copy_metrics
+          @copy_metrics = copy_remote.list_metrics(copy_service_id)
+        end
 
-          metrics = source_client.list_metrics(service_id)
-          metrics_copies = client.list_metrics(service_copy_id)
+        def fetch_copy_hits
+          @copy_hits = copy_metrics.find { |metric| metric['system_name'] == 'hits' } or raise 'missing hits metric'
+        end
 
-          hits = metrics.find{ |metric| metric['system_name'] == 'hits' } or raise 'missing hits metric'
-          hits_copy = metrics_copies.find{ |metric| metric['system_name'] == 'hits' } or raise 'missing hits metric'
+        def fetch_copy_methods
+          @copy_methods = copy_remote.list_methods(copy_service_id, copy_hits['id'])
+        end
 
-          methods = source_client.list_methods(service_id, hits['id'])
-          methods_copies = client.list_methods(service_copy_id, hits_copy['id'])
+        def fetch_copy_metrics_methods
+          fetch_copy_metrics
+          fetch_copy_hits
+          fetch_copy_methods
+          puts "copied service hits metric #{copy_hits['id']} has #{copy_methods.size} methods"
+        end
 
-          puts "original service hits metric #{hits['id']} has #{methods.size} methods"
-          puts "copied service hits metric #{hits_copy['id']} has #{methods_copies.size} methods"
+        def compare_hashes(first, second, keys)
+          keys.map { |key| first.fetch(key) } == keys.map { |key| second.fetch(key) }
+        end
 
-          missing_methods = methods.reject { |method|  methods_copies.find{|copy| compare_hashes(method, copy, ['system_name']) } }
+        def missing_methods
+          source_methods.reject do |method|
+            copy_methods.find do |copy|
+              compare_hashes(method, copy, ['system_name'])
+            end
+          end
+        end
 
+        def create_methods
           puts "creating #{missing_methods.size} missing methods on copied service"
 
           missing_methods.each do |method|
             copy = { friendly_name: method['friendly_name'], system_name: method['system_name'] }
-            client.create_method(service_copy_id, hits_copy['id'], copy)
+            copy_remote.create_method(copy_service_id, copy_hits['id'], copy)
           end
+        end
 
-          metrics_copies = client.list_metrics(service_copy_id)
+        def missing_metrics
+          source_metrics.reject do |metric|
+            copy_metrics.find do |copy|
+              compare_hashes(metric, copy, ['system_name'])
+            end
+          end
+        end
 
-          puts "original service has #{metrics.size} metrics"
-          puts "copied service has #{metrics_copies.size} metrics"
+        def create_metrics
+          puts "original service has #{source_metrics.size} metrics"
+          puts "copied service has #{copy_metrics.size} metrics"
 
-          missing_metrics = metrics.reject { |metric| metrics_copies.find{|copy| compare_hashes(metric, copy, ['system_name']) } }
-
-          missing_metrics.map do |metric|
+          missing_metrics.each do |metric|
             metric.delete('links')
-            client.create_metric(service_copy_id, metric)
+            copy_remote.create_metric(copy_service_id, metric)
           end
 
           puts "created #{missing_metrics.size} metrics on the copied service"
+        end
 
-          plans = source_client.list_service_application_plans(service_id)
-          plan_copies = client.list_service_application_plans(service_copy_id)
+        def fetch_source_app_plans
+          @source_plans = source_remote.list_service_application_plans service_id
+          puts "original service has #{source_plans.size} application plans "
+        end
 
-          puts "original service has #{plans.size} application plans "
-          puts "copied service has #{plan_copies.size} application plans"
+        def fetch_copy_app_plans
+          @copy_plans = copy_remote.list_service_application_plans copy_service_id
+          puts "copied service has #{copy_plans.size} application plans"
+        end
 
-          missing_application_plans = plans.reject { |plan| plan_copies.find{|copy| plan.fetch('system_name') == copy.fetch('system_name') } }
+        def missing_app_plans
+          source_plans.reject do |plan|
+            copy_plans.find do |copy|
+              plan.fetch('system_name') == copy.fetch('system_name')
+            end
+          end
+        end
 
-          puts "copied service missing #{missing_application_plans.size} application plans"
-
-          missing_application_plans.each do |plan|
+        def create_application_plans
+          puts "copied service missing #{missing_app_plans.size} application plans"
+          missing_app_plans.each do |plan|
             plan.delete('links')
             plan.delete('default') # TODO: handle default plan
-
             if plan.delete('custom') # TODO: what to do with custom plans?
               puts "skipping custom plan #{plan}"
             else
-              client.create_application_plan(service_copy_id, plan)
+              copy_remote.create_application_plan(copy_service_id, plan)
             end
           end
+        end
 
-          application_plan_mapping = client.list_service_application_plans(service_copy_id).map do |plan_copy|
-            plan = plans.find{|plan| plan.fetch('system_name') == plan_copy.fetch('system_name') }
-
-            [plan['id'], plan_copy['id']]
+        def destroy_default_mapping_rules
+          puts 'destroying all mapping rules of the copy which have been created by default'
+          copy_remote.list_mapping_rules(copy_service_id).each do |mapping_rule|
+            copy_remote.delete_mapping_rule(copy_service_id, mapping_rule['id'])
           end
+        end
 
-          metrics_mapping = client.list_metrics(service_copy_id).map do |copy|
-            metric = metrics.find{|metric| metric.fetch('system_name') == copy.fetch('system_name') }
+        def fetch_source_mapping_rules
+          @source_mapping_rules = source_remote.list_mapping_rules(service_id)
+          puts "the original service has #{source_mapping_rules.size} mapping rules"
+        end
+
+        def fetch_copy_mapping_rules
+          @copy_mapping_rules = copy_remote.list_mapping_rules(copy_service_id)
+          puts "the copy has #{copy_mapping_rules.size} mapping rules"
+        end
+
+        def create_metrics_mapping
+          @metrics_mapping = copy_remote.list_metrics(copy_service_id).map do |copy|
+            metric = source_metrics.find do |m|
+              m.fetch('system_name') == copy.fetch('system_name')
+            end
             metric ||= {}
 
             [metric['id'], copy['id']]
           end.to_h
+        end
 
-          puts "destroying all mapping rules of the copy which have been created by default"
-          client.list_mapping_rules(service_copy_id).each do |mapping_rule|
-            client.delete_mapping_rule(service_copy_id, mapping_rule['id'])
-          end
-
-          mapping_rules = source_client.list_mapping_rules(service_id)
-          mapping_rules_copy = client.list_mapping_rules(service_copy_id)
-
-          puts "the original service has #{mapping_rules.size} mapping rules"
-          puts "the copy has #{mapping_rules_copy.size} mapping rules"
-
-          unique_mapping_rules_copy = mapping_rules_copy.dup
-
-          missing_mapping_rules = mapping_rules.reject do |mapping_rule|
-            matching_metric = unique_mapping_rules_copy.find do |copy|
-              compare_hashes(mapping_rule, copy, %w(pattern http_method delta)) &&
+        def missing_mapping_rules
+          source_mapping_rules.reject do |mapping_rule|
+            copy_mapping_rules.find do |copy|
+              compare_hashes(mapping_rule, copy, %w[pattern http_method delta]) &&
                 metrics_mapping.fetch(mapping_rule.fetch('metric_id')) == copy.fetch('metric_id')
             end
-
-            unique_mapping_rules_copy.delete(matching_metric)
           end
+        end
 
+        def create_mapping_rules
           puts "missing #{missing_mapping_rules.size} mapping rules"
-
           missing_mapping_rules.each do |mapping_rule|
             mapping_rule.delete('links')
             mapping_rule['metric_id'] = metrics_mapping.fetch(mapping_rule.delete('metric_id'))
-            client.create_mapping_rule(service_copy_id, mapping_rule)
+            copy_remote.create_mapping_rule(copy_service_id, mapping_rule)
           end
           puts "created #{missing_mapping_rules.size} mapping rules"
+        end
 
-          puts "extra #{unique_mapping_rules_copy.size} mapping rules"
-          puts unique_mapping_rules_copy.each{|rule| rule.delete('links') }
-
-          application_plan_mapping.each do |original_id, copy_id|
-            limits = source_client.list_application_plan_limits(original_id)
-            limits_copy = client.list_application_plan_limits(copy_id)
-
-            missing_limits = limits.reject { |limit| limits_copy.find{|limit_copy| limit.fetch('period') == limit_copy.fetch('period') } }
-
-            missing_limits.each do |limit|
-              limit.delete('links')
-              client.create_application_plan_limit(copy_id, metrics_mapping.fetch(limit.fetch('metric_id')), limit)
+        def create_plan_mapping
+          @application_plan_mapping = copy_remote.list_service_application_plans(copy_service_id).map do |plan_copy|
+            plan = source_plans.find do |p|
+              p.fetch('system_name') == plan_copy.fetch('system_name')
             end
-            puts "copied application plan #{copy_id} is missing #{missing_limits.size} from the original plan #{original_id}"
+            [plan['id'], plan_copy['id']]
           end
+        end
+
+        def missing_limits(limits, limits_copy)
+          limits.reject do |limit|
+            limits_copy.find do |limit_copy|
+              limit.fetch('period') == limit_copy.fetch('period')
+            end
+          end
+        end
+
+        def create_limits
+          application_plan_mapping.each do |original_id, copy_id|
+            limits = source_remote.list_application_plan_limits(original_id)
+            limits_copy = copy_remote.list_application_plan_limits(copy_id)
+
+            m_l = missing_limits(limits, limits_copy)
+            m_l.each do |limit|
+              limit.delete('links')
+              copy_remote.create_application_plan_limit(
+                copy_id,
+                metrics_mapping.fetch(limit.fetch('metric_id')),
+                limit
+              )
+            end
+            puts "copied application plan #{copy_id} is missing #{m_l.size} from the original " \
+                 "plan #{original_id}"
+          end
+        end
+
+        def process
+          create_remotes
+          fetch_source_service
+          create_service
+          fetch_source_proxy_settings
+          create_proxy_settings
+          fetch_source_metrics_methods
+          fetch_copy_metrics_methods
+          create_methods
+          create_metrics
+          create_metrics_mapping
+          fetch_source_app_plans
+          fetch_copy_app_plans
+          create_application_plans
+          destroy_default_mapping_rules
+          fetch_source_mapping_rules
+          fetch_copy_mapping_rules
+          create_mapping_rules
+          create_plan_mapping
+          create_limits
         end
       end
     end

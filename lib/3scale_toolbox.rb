@@ -1,10 +1,10 @@
 require '3scale_toolbox/version'
 require '3scale_toolbox/error'
 require '3scale_toolbox/configuration'
+require '3scale_toolbox/remotes'
 require '3scale_toolbox/base_command'
 require '3scale_toolbox/commands'
 require '3scale_toolbox/cli'
-require '3scale_toolbox/remotes'
 
 module ThreeScaleToolbox
 

@@ -45,6 +45,15 @@ module ThreeScaleToolbox
       end
     end
 
+    def get_remote(origin)
+      remote = parse_remote_uri origin
+      ThreeScale::API.new(
+        endpoint:     remote[:endpoint],
+        provider_key: remote[:auth_key],
+        verify_ssl: verify_ssl
+      )
+    end
+
     private
 
     def raise_invalid_remote
