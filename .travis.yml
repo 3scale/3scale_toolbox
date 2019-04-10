@@ -3,11 +3,11 @@ cache: bundler
 before_install:
 - openssl aes-256-cbc -K $encrypted_3d22a8bf1dac_key -iv $encrypted_3d22a8bf1dac_iv
   -in .env.enc -out .env -d
-- gem install bundler -v 1.15.1
+- gem install bundler -v 1.17.3
 rvm:
-- 2.5.3
-- 2.4.5
-- 2.3.8
+- 2.6.2
+- 2.5.5
+- 2.4.6
 script:
 - bundle exec rake license_finder:check
 - bundle exec rake spec:all

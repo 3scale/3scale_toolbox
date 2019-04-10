@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'webmock', '~> 3.4'
-  spec.required_ruby_version = '>= 2.3'
+  spec.required_ruby_version = '>= 2.4'
 
   spec.add_dependency '3scale-api', '~> 0.1.9'
   spec.add_dependency 'cri', '~> 2.15'
