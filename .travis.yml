@@ -1,5 +1,4 @@
 language: ruby
-cache: bundler
 before_install:
 - openssl aes-256-cbc -K $encrypted_3d22a8bf1dac_key -iv $encrypted_3d22a8bf1dac_iv
   -in .env.enc -out .env -d
