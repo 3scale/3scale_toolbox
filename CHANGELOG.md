@@ -4,6 +4,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.19.0]
+
+### Fixed
+- Product import command: make logger null stream cross-platform compatible [#290](https://github.com/3scale/3scale_toolbox/pull/290)
+- Product copy command: copy methods includes description [#288](https://github.com/3scale/3scale_toolbox/pull/288)
+
 ## [0.18.1]
 
 ### Fixed
@@ -257,7 +263,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `3scale copy service` command to copy a service
   including its metrics, methods, application plans and their usage limits
 
-[Unreleased]: https://github.com/3scale/3scale_toolbox/compare/v0.18.1...HEAD
+[Unreleased]: https://github.com/3scale/3scale_toolbox/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.19.0
 [0.18.1]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.18.1
 [0.18.0]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.18.0
 [0.17.1]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.17.1

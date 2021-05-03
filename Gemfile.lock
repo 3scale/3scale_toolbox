@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    3scale_toolbox (0.18.1)
+    3scale_toolbox (0.19.0)
       3scale-api (~> 1.4)
       cri (~> 2.15)
       json-schema (~> 2.8)
@@ -46,17 +46,17 @@ GEM
       with_env (= 1.1.0)
       xml-simple
     method_source (1.0.0)
-    mini_portile2 (2.5.0)
+    mini_portile2 (2.5.1)
     minitest (5.14.4)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     mustermann-contrib (1.1.1)
       hansi (~> 0.2.0)
       mustermann (= 1.1.1)
-    nokogiri (1.11.2)
+    nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    oas_parser (0.25.1)
+    oas_parser (0.25.4)
       activesupport (>= 4.0.0)
       addressable (~> 2.3)
       builder (~> 3.2.3)
