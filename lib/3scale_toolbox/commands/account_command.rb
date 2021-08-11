@@ -1,4 +1,5 @@
 require '3scale_toolbox/commands/account_command/find_command'
+require '3scale_toolbox/commands/account_command/list_command'
 
 module ThreeScaleToolbox
   module Commands
@@ -18,6 +19,7 @@ module ThreeScaleToolbox
         end
       end
       add_subcommand(Find::FindSubcommand)
+      add_subcommand(List::ListAccountSubcommand)
     end
   end
 end
