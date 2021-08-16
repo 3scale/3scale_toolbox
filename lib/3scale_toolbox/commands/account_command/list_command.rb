@@ -15,20 +15,21 @@ module ThreeScaleToolbox
               summary     'list accounts'
               description 'List all accounts'
 
+              ThreeScaleToolbox::CLI.output_flag(self)
               param       :remote
 
               runner ListAccountSubcommand
             end
           end
 
-  	  ACCOUNTS_FIELDS_TO_SHOW = %w[ id state created_at org_name ]
+          ACCOUNTS_FIELDS_TO_SHOW = %w[ id state created_at org_name ]
 
           def run
-		  accounts = threescale_client(arguments[:remote]).list_accounts
-		  printer.print_collection accounts
+            accounts = threescale_client(arguments[:remote]).list_accounts
+            printer.print_collection accounts
           end
 	  
-	  def printer
+          def printer
             options.fetch(:output, CLI::CustomTablePrinter.new(ACCOUNTS_FIELDS_TO_SHOW))
           end
         end
