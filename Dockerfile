@@ -13,10 +13,11 @@ RUN chmod +t /tmp
 RUN bundle config --local silence_root_warning 1 \
     && bundle config --local disable_shared_gems 1 \
     && bundle config --local without "development test" \
-    && bundle config --local set deployment 'true' \
+    && bundle config set --local deployment 'true' \
     && bundle config --local gemfile Gemfile \
-    && bundle config --local set path 'vendor/bundle' \
-    && bundle install \
+    && bundle config set --local path 'vendor/bundle'
+
+RUN bundle install \
     && bundle binstubs 3scale_toolbox
 
 ENV PATH="/usr/src/app/bin:${PATH}"
