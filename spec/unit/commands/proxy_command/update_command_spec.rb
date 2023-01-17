@@ -19,7 +19,7 @@ RSpec.describe ThreeScaleToolbox::Commands::ProxyCommand::UpdateSubcommand do
     end
 
     it 'APIcast configuration updated' do
-      expect(service).to receive(:update_proxy).with('a' => 1, 'b' => 2).and_return(proxy_attrs)
+      expect(service).to receive(:update_proxy).with({'a' => 1, 'b' => 2}).and_return(proxy_attrs)
       expect { subject.run }.to output(pretty_printed_proxy).to_stdout
     end
 

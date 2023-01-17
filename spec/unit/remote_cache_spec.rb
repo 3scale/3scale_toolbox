@@ -505,7 +505,7 @@ RSpec.describe ThreeScaleToolbox::RemoteCache do
     end
 
     it 'backends cache miss' do
-      expect(proxied_object).to receive(:list_backends).with(page: 3, per_page: 2).and_return(backends_3)
+      expect(proxied_object).to receive(:list_backends).with({page: 3, per_page: 2}).and_return(backends_3)
       # miss
       expect(subject.list_backends(page: 3, per_page: 2)).to eq(backends_3)
       # hit
@@ -515,7 +515,7 @@ RSpec.describe ThreeScaleToolbox::RemoteCache do
     end
 
     it 'on error returns the error' do
-      expect(proxied_object).to receive(:list_backends).with(page: 3, per_page: 2).and_return(error_response)
+      expect(proxied_object).to receive(:list_backends).with({page: 3, per_page: 2}).and_return(error_response)
       expect(subject.list_backends(page: 3, per_page: 2)).to eq(error_response)
     end
   end

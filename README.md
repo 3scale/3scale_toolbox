@@ -41,8 +41,7 @@
 ## Requirements
 Supported Ruby interpreters
 
-* MRI 2.6
-* MRI 2.7
+* MRI 3.0
 
 ## Installation
 Install the toolbox:

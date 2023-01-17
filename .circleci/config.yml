@@ -22,23 +22,27 @@ commands:
             sudo gem uninstall bundler
             sudo rm /usr/local/bin/bundle || true
             sudo rm /usr/local/bin/bundler || true
-            sudo gem install bundler --version 2.2.21
+            sudo gem install bundler --version 2.3.5
 
   install_dependencies:
     steps:
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "Gemfile.lock" }}
+            - v3-dependencies-{{ checksum "Gemfile.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - v2-dependencies
+            - v3-dependencies
 
       - run:
           name: Install dependencies
           command: |
+            # required for the license_finder
+            # The Gemfile.lock specifies nokogiri (1.14.0)
+            # but bundler would install native gem instead if not forced
+            bundle config set --local force_ruby_platform true
             bundle install --jobs=3 --retry=3 --path vendor/bundle
 
       - save_cache:
-          key: v2-dependencies-{{ checksum "Gemfile.lock" }}
+          key: v3-dependencies-{{ checksum "Gemfile.lock" }}
           paths:
             - ./vendor/bundle
 
@@ -56,18 +60,9 @@ commands:
           docker_layer_caching: true
 
 jobs:
-  ruby-262-unittest:
+  ruby-30-unittest:
     docker:
-      - image: circleci/ruby:2.6.2
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - setup-bundler
-      - unittests
-
-  ruby-270-unittest:
-    docker:
-      - image: circleci/ruby:2.7.0
+      - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -76,7 +71,7 @@ jobs:
 
   license_check:
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -89,7 +84,7 @@ jobs:
 
   help_test:
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -102,7 +97,7 @@ jobs:
 
   integration_tests:
     docker:
-      - image: circleci/ruby:2.6.2
+      - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -127,7 +122,7 @@ jobs:
 
   push-rubygems:
     docker:
-      - image: circleci/ruby:2.6.3-stretch-node
+      - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
@@ -159,10 +154,7 @@ workflows:
   version: 2
   basic_tests:
     jobs:
-      - ruby-262-unittest:
-          filters:
-            <<: *tag-trigger
-      - ruby-270-unittest:
+      - ruby-30-unittest:
           filters:
             <<: *tag-trigger
       - license_check:
@@ -176,8 +168,7 @@ workflows:
             <<: *tag-trigger
       - push-rubygems:
           requires:
-            - ruby-262-unittest
-            - ruby-270-unittest
+            - ruby-30-unittest
             - license_check
             - help_test
           filters:
