@@ -1,12 +1,14 @@
-FROM registry.access.redhat.com/ubi8/ruby-27
+FROM registry.access.redhat.com/ubi9/ruby-30
 MAINTAINER Eguzki Astiz Lezaun <eastizle@redhat.com>
 
 USER root
 
-RUN gem install bundler --version 2.2.21 --no-document
+RUN gem install bundler --version 2.3.5 --no-document
 
 WORKDIR /usr/src/app
 COPY . .
+
+RUN chmod +t /tmp
 
 RUN bundle config --local silence_root_warning 1 \
     && bundle config --local disable_shared_gems 1 \

@@ -2,4 +2,4 @@
 
 set -ev
 
-gem install bundler --version 2.2.21
+gem install bundler --version 2.3.5
