@@ -40,5 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'cri', '~> 2.15'
   spec.add_dependency 'json-schema', '~> 2.8'
   spec.add_dependency 'oas_parser', '~> 0.20'
-  spec.add_dependency 'activesupport', '~> 6.0'
+  spec.add_dependency 'activesupport', '>= 6', '< 8'
 end

@@ -3,7 +3,7 @@ PATH
   specs:
     3scale_toolbox (0.20.0)
       3scale-api (~> 1.6)
-      activesupport (~> 6.0)
+      activesupport (>= 6, < 8)
       cri (~> 2.15)
       json-schema (~> 2.8)
       oas_parser (~> 0.20)
@@ -12,12 +12,11 @@ GEM
   remote: https://rubygems.org/
   specs:
     3scale-api (1.6.0)
-    activesupport (6.1.7)
+    activesupport (7.0.4.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
-      zeitwerk (~> 2.3)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
     builder (3.2.4)
@@ -104,7 +103,6 @@ GEM
     with_env (1.1.0)
     xml-simple (1.1.9)
       rexml
-    zeitwerk (2.6.6)
 
 PLATFORMS
   ruby
