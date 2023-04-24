@@ -29,7 +29,7 @@ module ThreeScaleToolbox
             # only applies to oauth2 sec type
             return if api_spec.security.nil? || api_spec.security[:type] != 'oauth2'
 
-            settings.merge!(api_spec.security[:flows])
+            settings.merge!(api_spec.security[:flows] || {})
           end
         end
       end

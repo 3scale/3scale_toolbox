@@ -5,6 +5,12 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
   let(:validate) { true }
   subject { described_class.build(raw_specification, validate: validate) }
   let(:content) { basic_swagger_content }
+  let(:basic_empty_flow) do
+    {
+      standard_flow_enabled: false, implicit_flow_enabled: false,
+      service_accounts_enabled: false, direct_access_grants_enabled: false
+    }
+  end
 
   context 'missing info' do
     let(:content) do
@@ -217,7 +223,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be_nil
+        expect(subject.security[:flows]).to be_nil
       end
 
       it 'scopes matches' do
@@ -249,7 +255,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:implicit_flow_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(implicit_flow_enabled: true))
       end
 
       it 'scopes matches' do
@@ -281,7 +287,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:direct_access_grants_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(direct_access_grants_enabled: true))
       end
 
       it 'scopes matches' do
@@ -313,7 +319,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:service_accounts_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(service_accounts_enabled: true))
       end
 
       it 'scopes matches' do
@@ -345,7 +351,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::Swagger do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:standard_flow_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(standard_flow_enabled: true))
       end
 
       it 'scopes matches' do

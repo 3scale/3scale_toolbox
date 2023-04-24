@@ -65,6 +65,15 @@ RSpec.describe ThreeScaleToolbox::Commands::ImportCommand::OpenAPI::UpdateServic
 
       let(:security) { { id: 'oidc', type: 'oauth2', flows: flows } }
 
+      context 'no flows' do
+        let(:flows) { nil }
+
+        it 'service is not updated' do
+          # if service.update_oidc is called, this test should fail
+          subject
+        end
+      end
+
       context 'flow implicit' do
         let(:flows) { basic_empty_flow.merge(implicit_flow_enabled: true) }
         let(:expected_implicit_flow) { true }

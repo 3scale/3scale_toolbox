@@ -21,7 +21,11 @@ module ThreeScaleToolbox
     #     * :type -> string
     #     * :name -> string
     #     * :in_f -> string
-    #     * :flow -> symbol (:implicit_flow_enabled, :direct_access_grants_enabled, :service_accounts_enabled, :standard_flow_enabled)
+    #     * :flows -> hash
+    #       * :implicit_flow_enabled -> bool
+    #       * :direct_access_grants_enabled -> bool
+    #       * :service_accounts_enabled -> bool
+    #       * :standard_flow_enabled -> bool
     #     * :scopes -> array of string
     # * Swagger.service_backend_version -> string ('1','2','oidc')
     # * Swagger.set_server_url -> def(spec, url)
@@ -150,7 +154,7 @@ module ThreeScaleToolbox
               type: sec_def['type'],
               name: sec_def['name'],
               in_f: sec_def['in'],
-              flow: convert_flow(sec_def['flow']),
+              flows: parse_flows(sec_def['flow']),
               scopes: sec_item
             }
           end
@@ -169,6 +173,21 @@ module ThreeScaleToolbox
 
       def security_definitions
         raw['securityDefinitions'] || {}
+      end
+
+      def parse_flows(flow_name)
+        return nil if flow_name.nil?
+
+        basic_flows_object.merge!({ convert_flow(flow_name) => true })
+      end
+
+      def basic_flows_object
+        {
+          standard_flow_enabled: false,
+          implicit_flow_enabled: false,
+          service_accounts_enabled: false,
+          direct_access_grants_enabled: false
+        }
       end
 
       def convert_flow(flow_name)
