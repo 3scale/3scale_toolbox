@@ -345,6 +345,16 @@ RSpec.shared_context :oas3_resources do
           petstore_oauth:
             type: oauth2
             flows:
+              clientCredentials:
+                tokenUrl: http://example.org/api/oauth/dialog
+                scopes:
+                  write:pets: modify pets in your account
+                  read:pets: read your pets
+              authorizationCode:
+                authorizationUrl: https://example.com/api/oauth/dialog
+                tokenUrl: http://example.org/api/oauth/token
+                scopes:
+                  write:pets: modify pets in your account
               implicit:
                 authorizationUrl: http://example.org/api/oauth/dialog
                 scopes:

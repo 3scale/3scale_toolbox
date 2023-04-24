@@ -72,7 +72,6 @@ $ tool_to_read_openapi_from_source | 3scale import openapi -d <destination> -
   * Only first `servers[0].url` element in `servers` list parsed as *private base url*. As OpenAPI specification`basePath` property, `servers[0].url` URL's base path component will be used.
   * Toolbox will *not* parse servers in path item or operation objects.
   * Supported security schemes: apiKey, oauth2 (any flow type).
-  * Multiple flows in security scheme object not supported.
 
 ### Importing 3scale Backend
 

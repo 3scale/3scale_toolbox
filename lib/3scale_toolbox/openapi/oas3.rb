@@ -21,7 +21,11 @@ module ThreeScaleToolbox
     #     * :type -> string
     #     * :name -> string
     #     * :in_f -> string
-    #     * :flow -> symbol (:implicit_flow_enabled, :direct_access_grants_enabled, :service_accounts_enabled, :standard_flow_enabled)
+    #     * :flows -> hash
+    #       * :implicit_flow_enabled -> bool
+    #       * :direct_access_grants_enabled -> bool
+    #       * :service_accounts_enabled -> bool
+    #       * :standard_flow_enabled -> bool
     #     * :scopes -> array of string
     # * OAS3.service_backend_version -> string ('1','2','oidc')
     # * OAS3.set_server_url -> def(spec, url)
@@ -103,9 +107,10 @@ module ThreeScaleToolbox
           raise ThreeScaleToolbox::Error, "Expected security scheme {#{sec_scheme_id}} not found or not oauth2"
         end
 
-        flow_key, flow_obj = sec_scheme_obj['flows'].first
-        flow_obj['authorizationUrl'] = authorization_url if %w[implicit authorizationCode].include?(flow_key)
-        flow_obj['tokenUrl'] = token_url if %w[password clientCredentials authorizationCode].include?(flow_key)
+        sec_scheme_obj['flows'].each do |flow_key, flow_obj|
+          flow_obj['authorizationUrl'] = authorization_url if %w[implicit authorizationCode].include?(flow_key)
+          flow_obj['tokenUrl'] = token_url if %w[password clientCredentials authorizationCode].include?(flow_key)
+        end
       end
 
       def set_server_url(spec, url)
@@ -184,7 +189,7 @@ module ThreeScaleToolbox
               type: sec_def['type'],
               name: sec_def['name'],
               in_f: sec_def['in'],
-              flow: parse_flows(sec_def['flows']),
+              flows: parse_flows(sec_def['flows']),
               scopes: sec_item
             }
           end
@@ -208,9 +213,18 @@ module ThreeScaleToolbox
       def parse_flows(flows_object)
         return nil if flows_object.nil?
 
-        raise ThreeScaleToolbox::Error, 'Invalid OAS: multiple flows' if flows_object.size > 1
+        flows_object.keys.reduce(basic_flows_object) do |obj, key|
+          obj.merge!(convert_flow(key) => true)
+        end
+      end
 
-        convert_flow(flows_object.keys.first)
+      def basic_flows_object
+        {
+          standard_flow_enabled: false,
+          implicit_flow_enabled: false,
+          service_accounts_enabled: false,
+          direct_access_grants_enabled: false
+        }
       end
 
       def convert_flow(flow_name)
