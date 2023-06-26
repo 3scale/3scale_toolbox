@@ -20,7 +20,7 @@ RSpec.describe ThreeScaleToolbox::Commands::ImportCommand::OpenAPI::UpdateServic
     {
       target: service,
       api_spec: api_spec,
-      logger: logger,
+      logger: logger
     }
   end
 
@@ -56,32 +56,65 @@ RSpec.describe ThreeScaleToolbox::Commands::ImportCommand::OpenAPI::UpdateServic
       let(:expected_implicit_flow) { false }
       let(:expected_service_accounts) { false }
       let(:expected_direct_access_grants) { false }
-      let(:security) { { id: 'oidc', type: 'oauth2', flow: flow } }
+      let(:basic_empty_flow) do
+        {
+          standard_flow_enabled: false, implicit_flow_enabled: false,
+          service_accounts_enabled: false, direct_access_grants_enabled: false
+        }
+      end
+
+      let(:security) { { id: 'oidc', type: 'oauth2', flows: flows } }
+
+      context 'no flows' do
+        let(:flows) { nil }
+
+        it 'service is not updated' do
+          # if service.update_oidc is called, this test should fail
+          subject
+        end
+      end
 
       context 'flow implicit' do
-        let(:flow) { :implicit_flow_enabled }
+        let(:flows) { basic_empty_flow.merge(implicit_flow_enabled: true) }
         let(:expected_implicit_flow) { true }
 
         it_behaves_like 'oidc is updated with required flow'
       end
 
       context 'flow password' do
-        let(:flow) { :direct_access_grants_enabled }
+        let(:flows) { basic_empty_flow.merge(direct_access_grants_enabled: true) }
         let(:expected_direct_access_grants) { true }
 
         it_behaves_like 'oidc is updated with required flow'
       end
 
       context 'flow application' do
-        let(:flow) { :service_accounts_enabled }
+        let(:flows) { basic_empty_flow.merge(service_accounts_enabled: true) }
         let(:expected_service_accounts) { true }
 
         it_behaves_like 'oidc is updated with required flow'
       end
 
       context 'flow accessCode' do
-        let(:flow) { :standard_flow_enabled }
+        let(:flows) { basic_empty_flow.merge(standard_flow_enabled: true) }
         let(:expected_standard_flow) { true }
+
+        it_behaves_like 'oidc is updated with required flow'
+      end
+
+      context 'all flows' do
+        let(:flows) do
+          {
+            standard_flow_enabled: true,
+            implicit_flow_enabled: true,
+            service_accounts_enabled: true,
+            direct_access_grants_enabled: true
+          }
+        end
+        let(:expected_standard_flow) { true }
+        let(:expected_service_accounts) { true }
+        let(:expected_direct_access_grants) { true }
+        let(:expected_implicit_flow) { true }
 
         it_behaves_like 'oidc is updated with required flow'
       end

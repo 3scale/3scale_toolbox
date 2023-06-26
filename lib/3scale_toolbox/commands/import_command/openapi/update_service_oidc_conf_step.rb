@@ -29,13 +29,7 @@ module ThreeScaleToolbox
             # only applies to oauth2 sec type
             return if api_spec.security.nil? || api_spec.security[:type] != 'oauth2'
 
-            oidc_configuration = {
-              standard_flow_enabled: false,
-              implicit_flow_enabled: false,
-              service_accounts_enabled: false,
-              direct_access_grants_enabled: false
-            }.merge(api_spec.security[:flow] => true)
-            settings.merge!(oidc_configuration)
+            settings.merge!(api_spec.security[:flows] || {})
           end
         end
       end

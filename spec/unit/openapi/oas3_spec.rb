@@ -6,6 +6,12 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
   let(:path) { '/path/to/petstore.yaml' }
   subject { described_class.build(path, raw_specification, validate: validate) }
   let(:content) { basic_oas3_content }
+  let(:basic_empty_flow) do
+    {
+      standard_flow_enabled: false, implicit_flow_enabled: false,
+      service_accounts_enabled: false, direct_access_grants_enabled: false
+    }
+  end
 
   context 'missing info' do
     let(:content) do
@@ -262,7 +268,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be_nil
+        expect(subject.security[:flows]).to be_nil
       end
 
       it 'scopes matches' do
@@ -294,7 +300,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:implicit_flow_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(implicit_flow_enabled: true))
       end
 
       it 'scopes matches' do
@@ -326,7 +332,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:direct_access_grants_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(direct_access_grants_enabled: true))
       end
 
       it 'scopes matches' do
@@ -358,7 +364,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:service_accounts_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(service_accounts_enabled: true))
       end
 
       it 'scopes matches' do
@@ -390,7 +396,7 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
       end
 
       it 'flow matches' do
-        expect(subject.security[:flow]).to be(:standard_flow_enabled)
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge(standard_flow_enabled: true))
       end
 
       it 'scopes matches' do
@@ -459,9 +465,41 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
     context 'multiple flow security schema' do
       let(:content) { oauth2_multiple_flow_oas3_content }
 
-      it 'parsing raises error' do
-        expect { subject.security }.to raise_error(ThreeScaleToolbox::Error,
-                                                   /Invalid OAS: multiple flows/)
+      it 'matches oidc version' do
+        expect(subject.service_backend_version).to eq('oidc')
+      end
+
+      it 'available' do
+        expect(subject.security).not_to be_nil
+      end
+
+      it 'id matches' do
+        expect(subject.security[:id]).to eq('petstore_oauth')
+      end
+
+      it 'type matches' do
+        expect(subject.security[:type]).to eq('oauth2')
+      end
+
+      it 'name matches' do
+        expect(subject.security[:name]).to be_nil
+      end
+
+      it 'in_f matches' do
+        expect(subject.security[:in_f]).to be_nil
+      end
+
+      it 'flow matches' do
+        expect(subject.security[:flows]).to eq(basic_empty_flow.merge({
+                                                                       implicit_flow_enabled: true,
+                                                                       direct_access_grants_enabled: true,
+                                                                       service_accounts_enabled: true,
+                                                                       standard_flow_enabled: true
+                                                                     }))
+      end
+
+      it 'scopes matches' do
+        expect(subject.security[:scopes]).to match_array(['write:pets', 'read:pets'])
       end
     end
   end
