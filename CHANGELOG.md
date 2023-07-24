@@ -4,11 +4,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0]
+
+### Added
+- Support for Ruby 3 [#363](https://github.com/3scale/3scale_toolbox/pull/363)
+- OpenAPI support for multiple flows in oauth [#368](https://github.com/3scale/3scale_toolbox/pull/368)
+
 ### Fixed
 -  Apply application command: only set app key type depending on backend_version [#361](https://github.com/3scale/3scale_toolbox/pull/361)
 
 ### Changed
-- Upgrade internal dependencies [#351](https://github.com/3scale/3scale_toolbox/pull/351) [#353](https://github.com/3scale/3scale_toolbox/pull/353) [#354](https://github.com/3scale/3scale_toolbox/pull/354) [#359](https://github.com/3scale/3scale_toolbox/pull/359) [#360](https://github.com/3scale/3scale_toolbox/pull/360)
+- Upgrade internal dependencies [#351](https://github.com/3scale/3scale_toolbox/pull/351) [#353](https://github.com/3scale/3scale_toolbox/pull/353) [#354](https://github.com/3scale/3scale_toolbox/pull/354) [#359](https://github.com/3scale/3scale_toolbox/pull/359) [#360](https://github.com/3scale/3scale_toolbox/pull/360) [#365](https://github.com/3scale/3scale_toolbox/pull/365) [#366](https://github.com/3scale/3scale_toolbox/pull/366) [#367](https://github.com/3scale/3scale_toolbox/pull/367)
 
 ## [0.20.0]
 
@@ -325,7 +331,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - `3scale copy service` command to copy a service
   including its metrics, methods, application plans and their usage limits
 
-[Unreleased]: https://github.com/3scale/3scale_toolbox/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/3scale/3scale_toolbox/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/3scale/3scale_toolbox/releases/tag/v1.0.0
 [0.20.0]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.20.0
 [0.19.3]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.19.3
 [0.19.2]: https://github.com/3scale/3scale_toolbox/releases/tag/v0.19.2
