@@ -13,7 +13,7 @@
       </dependency>
           <dependency>
         <packageName>3scale_toolbox</packageName>
-        <version>0.20.0</version>
+        <version>1.0.0</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -23,7 +23,7 @@
       </dependency>
           <dependency>
         <packageName>activesupport</packageName>
-        <version>6.1.7</version>
+        <version>7.0.6</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -83,7 +83,7 @@
       </dependency>
           <dependency>
         <packageName>concurrent-ruby</packageName>
-        <version>1.1.10</version>
+        <version>1.2.2</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -191,7 +191,7 @@
       </dependency>
           <dependency>
         <packageName>i18n</packageName>
-        <version>1.12.0</version>
+        <version>1.14.1</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -230,8 +230,18 @@
                   </licenses>
       </dependency>
           <dependency>
+        <packageName>mini_portile2</packageName>
+        <version>2.8.4</version>
+        <licenses>
+                      <license>
+              <name>MIT</name>
+              <url>http://opensource.org/licenses/mit-license</url>
+            </license>
+                  </licenses>
+      </dependency>
+          <dependency>
         <packageName>minitest</packageName>
-        <version>5.17.0</version>
+        <version>5.18.1</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -261,7 +271,7 @@
       </dependency>
           <dependency>
         <packageName>nokogiri</packageName>
-        <version>1.14.0</version>
+        <version>1.15.3</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -301,7 +311,7 @@
       </dependency>
           <dependency>
         <packageName>racc</packageName>
-        <version>1.6.2</version>
+        <version>1.7.1</version>
         <licenses>
                       <license>
               <name>Simplified BSD</name>
@@ -459,7 +469,7 @@
       </dependency>
           <dependency>
         <packageName>tzinfo</packageName>
-        <version>2.0.5</version>
+        <version>2.0.6</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -490,16 +500,6 @@
           <dependency>
         <packageName>xml-simple</packageName>
         <version>1.1.9</version>
-        <licenses>
-                      <license>
-              <name>MIT</name>
-              <url>http://opensource.org/licenses/mit-license</url>
-            </license>
-                  </licenses>
-      </dependency>
-          <dependency>
-        <packageName>zeitwerk</packageName>
-        <version>2.6.6</version>
         <licenses>
                       <license>
               <name>MIT</name>
