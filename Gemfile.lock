@@ -12,7 +12,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     3scale-api (1.6.0)
-    activesupport (7.0.6)
+    activesupport (7.0.7.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -47,7 +47,7 @@ GEM
       xml-simple (~> 1.1.9)
     method_source (1.0.0)
     mini_portile2 (2.8.4)
-    minitest (5.18.1)
+    minitest (5.19.0)
     mustermann (1.1.2)
       ruby2_keywords (~> 0.0.1)
     mustermann-contrib (1.1.2)
