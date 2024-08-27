@@ -90,6 +90,24 @@ RSpec.shared_context :oas3_resources do
     YAML
   end
 
+  let(:servers_relative_oas3_content) do
+    <<~YAML
+      ---
+      openapi: "3.0.0"
+      info:
+        title: "some title"
+        version: "1.0.0"
+      servers:
+        - url: /v1
+      paths:
+        /pet:
+          get:
+            operationId: "getPet"
+            responses:
+              405:
+                description: "invalid input"
+    YAML
+  end
 
   let(:path_extensions_oas3_content) do
     <<~YAML

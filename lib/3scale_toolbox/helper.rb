@@ -25,12 +25,7 @@ module ThreeScaleToolbox
 
       def parse_uri(uri)
         # raises error when remote_str is not string, but object or something else.
-        uri_obj = URI(uri)
-        # URI::HTTP is parent of URI::HTTPS
-        # with single check both types are checked
-        raise ThreeScaleToolbox::InvalidUrlError, "invalid url: #{uri}" unless uri_obj.kind_of?(URI::HTTP)
-
-        uri_obj
+        URI(uri)
       end
 
       def hash_deep_dup(hash)
