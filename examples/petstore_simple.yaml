@@ -1,0 +1,23 @@
+---
+openapi: "3.0.2"
+info:
+  title: "Petstore"
+  description: "petstore API"
+  version: "1.0.0"
+servers:
+  - url: /api
+paths:
+  /pet:
+    get:
+      operationId: "getPet"
+      responses:
+        405:
+          description: "invalid input"
+security:
+  - petstore_api_key: []
+components:
+  securitySchemes:
+    petstore_api_key:
+      type: apiKey
+      name: user_key
+      in: query

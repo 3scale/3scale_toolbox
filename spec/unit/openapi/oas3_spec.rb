@@ -108,6 +108,14 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
         expect(subject.base_path).to eq('/v1/petstorev1')
       end
     end
+
+    context 'relative servers' do
+      let(:content) { servers_relative_oas3_content }
+
+      it 'should return /v1' do
+        expect(subject.base_path).to eq('/v1')
+      end
+    end
   end
 
   context '#host' do
@@ -140,6 +148,14 @@ RSpec.describe ThreeScaleToolbox::OpenAPI::OAS3 do
 
       it 'template rendered' do
         expect(subject.host).to eq('petstorev1.swagger.io:443')
+      end
+    end
+
+    context 'relative servers' do
+      let(:content) { servers_relative_oas3_content }
+
+      it 'should be nil' do
+        expect(subject.host).to be_nil
       end
     end
   end

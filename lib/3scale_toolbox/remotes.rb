@@ -4,6 +4,8 @@ module ThreeScaleToolbox
       def from_uri(uri_str)
         uri = Helper.parse_uri(uri_str)
 
+        raise ThreeScaleToolbox::InvalidUrlError, "invalid url: #{uri_str}" unless uri.kind_of?(URI::HTTP)
+
         authentication = uri.user
         uri.user = ''
         { authentication: authentication, endpoint: uri.to_s }

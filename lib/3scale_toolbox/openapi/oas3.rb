@@ -68,7 +68,10 @@ module ThreeScaleToolbox
 
       def host
         # If there are many? take first
-        server_objects { |url| "#{url.host}:#{url.port}" }.first
+        server_objects do |url|
+          # URI::HTTP is parent of URI::HTTPS, so both covered
+          "#{url.host}:#{url.port}" if url.kind_of?(URI::HTTP)
+        end.first
       end
 
       def scheme
