@@ -28,9 +28,9 @@ module ThreeScaleToolbox
         end
 
         def validate_remote(remote_url_str)
-          # parsing url before trying to create client
-          # raises Invalid URL when syntax is incorrect
-          ThreeScaleToolbox::Helper.parse_uri(remote_url_str)
+          uri_obj = ThreeScaleToolbox::Helper.parse_uri(remote_url_str)
+          raise ThreeScaleToolbox::InvalidUrlError, "invalid url: #{remote_url_str}" unless uri_obj.kind_of?(URI::HTTP)
+
           threescale_client(remote_url_str).list_accounts
         rescue ThreeScale::API::HttpClient::ForbiddenError
           raise ThreeScaleToolbox::Error, 'remote not valid'
