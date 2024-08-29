@@ -185,12 +185,3 @@ workflows:
           context: autotestaccount
           requires:
             - manual_approval
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-          <<: *only-main-filter
-    jobs:
-      - integration_tests:
-          context: autotestaccount
-      - docker_container_help_test
