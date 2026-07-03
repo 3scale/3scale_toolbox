@@ -13,6 +13,19 @@ only-main-filter: &only-main-filter
       only: main
 
 commands:
+  use-https-checkout:
+    steps:
+      - run:
+          name: Use HTTPS for git checkout
+          command: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+  install-qlty:
+    steps:
+      - run:
+          name: Install Qlty CLI
+          command: |
+            curl -sL https://qlty.sh | bash
+
   setup-bundler:
     steps:
       - run:
@@ -67,20 +80,22 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
+      - use-https-checkout
       - checkout
       - setup-bundler
       - unittests
+      - install-qlty
       - run:
-          name: Upload coverage to Qlty
+          name: Upload unit test coverage to Qlty
           command: |
-            curl -sL https://qlty.sh | bash
-            ~/.qlty/bin/qlty coverage publish coverage/.resultset.json
+            ~/.qlty/bin/qlty coverage publish --tag unit --incomplete coverage/.resultset.json
 
   license_check:
     docker:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
+      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
@@ -94,6 +109,7 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
+      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
@@ -107,13 +123,21 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
+      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
       - run:
           name: Integration Tests
+          environment:
+            COVERAGE: 1
           command: |
             bundle exec rake spec:integration
+      - install-qlty
+      - run:
+          name: Upload integration test coverage to Qlty
+          command: |
+            ~/.qlty/bin/qlty coverage publish --tag integration --incomplete coverage/.resultset.json
 
   docker_container_help_test:
     docker:
@@ -127,11 +151,26 @@ jobs:
             docker rmi quay.io/redhat/3scale-toolbox:main || true
             docker run --rm -t quay.io/redhat/3scale-toolbox:main 3scale help
 
+  complete-coverage:
+    docker:
+      - image: cimg/ruby:3.0
+    working_directory: ~/repo
+    steps:
+      - use-https-checkout
+      - checkout
+      - install-qlty
+      - run:
+          name: Mark coverage as complete
+          command: |
+            ~/.qlty/bin/qlty coverage complete --tag unit
+            ~/.qlty/bin/qlty coverage complete --tag integration
+
   push-rubygems:
     docker:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
+      - use-https-checkout
       - checkout
       - run:
           name: Setup Rubygems
@@ -147,6 +186,7 @@ jobs:
     working_directory: /app
     steps:
       - setup-docker
+      - use-https-checkout
       - checkout
       - run:
           name: Build application Docker image
@@ -189,6 +229,10 @@ workflows:
           context: autotestaccount
           requires:
             - manual_approval
+      - complete-coverage:
+          requires:
+            - ruby-30-unittest
+            - integration_tests
 
   main:
     when:
@@ -206,6 +250,12 @@ workflows:
       - image-build:
           filters:
             <<: *tag-trigger
+      - integration_tests:
+          context: autotestaccount
+      - complete-coverage:
+          requires:
+            - ruby-30-unittest
+            - integration_tests
       - push-rubygems:
           requires:
             - ruby-30-unittest
