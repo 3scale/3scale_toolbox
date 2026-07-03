@@ -13,12 +13,6 @@ only-main-filter: &only-main-filter
       only: main
 
 commands:
-  use-https-checkout:
-    steps:
-      - run:
-          name: Use HTTPS for git checkout
-          command: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
-
   install-qlty:
     steps:
       - run:
@@ -80,7 +74,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - setup-bundler
       - unittests
@@ -95,7 +88,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
@@ -109,7 +101,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
@@ -123,7 +114,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - setup-bundler
       - install_dependencies
@@ -156,7 +146,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - install-qlty
       - run:
@@ -170,7 +159,6 @@ jobs:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
-      - use-https-checkout
       - checkout
       - run:
           name: Setup Rubygems
@@ -186,7 +174,6 @@ jobs:
     working_directory: /app
     steps:
       - setup-docker
-      - use-https-checkout
       - checkout
       - run:
           name: Build application Docker image
