@@ -51,6 +51,8 @@ commands:
       - install_dependencies
       - run:
           name: Run unittests
+          environment:
+            COVERAGE: 1
           command: |
             bundle exec rake spec:unit
 
@@ -68,6 +70,11 @@ jobs:
       - checkout
       - setup-bundler
       - unittests
+      - run:
+          name: Upload coverage to Qlty
+          command: |
+            curl -sL https://qlty.sh | bash
+            ~/.qlty/bin/qlty coverage publish coverage/.resultset.json
 
   license_check:
     docker:
