@@ -158,8 +158,41 @@ jobs:
             docker run --rm -t app 3scale help
 
 workflows:
-  version: 2
-  basic_tests:
+  pr:
+    when:
+      not:
+        equal: [ main, << pipeline.git.branch >> ]
+    jobs:
+      - manual_approval:
+          type: approval
+      - ruby-30-unittest:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - license_check:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - help_test:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - image-build:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - integration_tests:
+          context: autotestaccount
+          requires:
+            - manual_approval
+
+  main:
+    when:
+      equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - ruby-30-unittest:
           filters:
@@ -182,13 +215,3 @@ workflows:
             <<: *tag-trigger
             branches:
               ignore: /.*/
-
-  integration:
-    jobs:
-      - manual_approval:  # <<< A job that will require manual approval in the web application.
-          type: approval  # <<< This key-value pair will set your workflow to a status of "On Hold"
-          # On approval of the `hold` job, any successive job that requires the `hold` job will run.
-      - integration_tests:
-          context: autotestaccount
-          requires:
-            - manual_approval
