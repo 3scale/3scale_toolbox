@@ -13,12 +13,25 @@ only-main-filter: &only-main-filter
       only: main
 
 commands:
-  install-qlty:
+  upload-coverage:
+    parameters:
+      tag:
+        type: string
     steps:
       - run:
-          name: Install Qlty CLI
+          name: Upload << parameters.tag >> coverage to Qlty
           command: |
-            curl -sL https://qlty.sh | bash
+            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
+            ~/.qlty/bin/qlty coverage publish --tag << parameters.tag >> --incomplete coverage/.resultset.json
+
+  complete-coverage:
+    steps:
+      - run:
+          name: Mark coverage as complete
+          command: |
+            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
+            ~/.qlty/bin/qlty coverage complete --tag unit
+            ~/.qlty/bin/qlty coverage complete --tag integration
 
   setup-bundler:
     steps:
@@ -77,11 +90,8 @@ jobs:
       - checkout
       - setup-bundler
       - unittests
-      - install-qlty
-      - run:
-          name: Upload unit test coverage to Qlty
-          command: |
-            ~/.qlty/bin/qlty coverage publish --tag unit --incomplete coverage/.resultset.json
+      - upload-coverage:
+          tag: unit
 
   license_check:
     docker:
@@ -123,11 +133,8 @@ jobs:
             COVERAGE: 1
           command: |
             bundle exec rake spec:integration
-      - install-qlty
-      - run:
-          name: Upload integration test coverage to Qlty
-          command: |
-            ~/.qlty/bin/qlty coverage publish --tag integration --incomplete coverage/.resultset.json
+      - upload-coverage:
+          tag: integration
 
   docker_container_help_test:
     docker:
@@ -141,18 +148,13 @@ jobs:
             docker rmi quay.io/redhat/3scale-toolbox:main || true
             docker run --rm -t quay.io/redhat/3scale-toolbox:main 3scale help
 
-  complete-coverage:
+  finalize-coverage:
     docker:
       - image: cimg/ruby:3.0
     working_directory: ~/repo
     steps:
       - checkout
-      - install-qlty
-      - run:
-          name: Mark coverage as complete
-          command: |
-            ~/.qlty/bin/qlty coverage complete --tag unit
-            ~/.qlty/bin/qlty coverage complete --tag integration
+      - complete-coverage
 
   push-rubygems:
     docker:
@@ -216,7 +218,7 @@ workflows:
           context: autotestaccount
           requires:
             - manual_approval
-      - complete-coverage:
+      - finalize-coverage:
           requires:
             - ruby-30-unittest
             - integration_tests
@@ -239,7 +241,7 @@ workflows:
             <<: *tag-trigger
       - integration_tests:
           context: autotestaccount
-      - complete-coverage:
+      - finalize-coverage:
           requires:
             - ruby-30-unittest
             - integration_tests
