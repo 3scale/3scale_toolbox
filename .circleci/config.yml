@@ -13,6 +13,26 @@ only-main-filter: &only-main-filter
       only: main
 
 commands:
+  upload-coverage:
+    parameters:
+      tag:
+        type: string
+    steps:
+      - run:
+          name: Upload << parameters.tag >> coverage to Qlty
+          command: |
+            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
+            ~/.qlty/bin/qlty coverage publish --tag << parameters.tag >> --incomplete coverage/.resultset.json
+
+  complete-coverage:
+    steps:
+      - run:
+          name: Mark coverage as complete
+          command: |
+            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
+            ~/.qlty/bin/qlty coverage complete --tag unit
+            ~/.qlty/bin/qlty coverage complete --tag integration
+
   setup-bundler:
     steps:
       - run:
@@ -51,6 +71,8 @@ commands:
       - install_dependencies
       - run:
           name: Run unittests
+          environment:
+            COVERAGE: 1
           command: |
             bundle exec rake spec:unit
 
@@ -68,6 +90,8 @@ jobs:
       - checkout
       - setup-bundler
       - unittests
+      - upload-coverage:
+          tag: unit
 
   license_check:
     docker:
@@ -105,8 +129,12 @@ jobs:
       - install_dependencies
       - run:
           name: Integration Tests
+          environment:
+            COVERAGE: 1
           command: |
             bundle exec rake spec:integration
+      - upload-coverage:
+          tag: integration
 
   docker_container_help_test:
     docker:
@@ -119,6 +147,14 @@ jobs:
           command: |
             docker rmi quay.io/redhat/3scale-toolbox:main || true
             docker run --rm -t quay.io/redhat/3scale-toolbox:main 3scale help
+
+  finalize-coverage:
+    docker:
+      - image: cimg/ruby:3.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - complete-coverage
 
   push-rubygems:
     docker:
@@ -151,8 +187,45 @@ jobs:
             docker run --rm -t app 3scale help
 
 workflows:
-  version: 2
-  basic_tests:
+  pr:
+    when:
+      not:
+        equal: [ main, << pipeline.git.branch >> ]
+    jobs:
+      - manual_approval:
+          type: approval
+      - ruby-30-unittest:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - license_check:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - help_test:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - image-build:
+          requires:
+            - manual_approval
+          filters:
+            <<: *tag-trigger
+      - integration_tests:
+          context: autotestaccount
+          requires:
+            - manual_approval
+      - finalize-coverage:
+          requires:
+            - ruby-30-unittest
+            - integration_tests
+
+  main:
+    when:
+      equal: [ main, << pipeline.git.branch >> ]
     jobs:
       - ruby-30-unittest:
           filters:
@@ -166,6 +239,12 @@ workflows:
       - image-build:
           filters:
             <<: *tag-trigger
+      - integration_tests:
+          context: autotestaccount
+      - finalize-coverage:
+          requires:
+            - ruby-30-unittest
+            - integration_tests
       - push-rubygems:
           requires:
             - ruby-30-unittest
@@ -175,13 +254,3 @@ workflows:
             <<: *tag-trigger
             branches:
               ignore: /.*/
-
-  integration:
-    jobs:
-      - manual_approval:  # <<< A job that will require manual approval in the web application.
-          type: approval  # <<< This key-value pair will set your workflow to a status of "On Hold"
-          # On approval of the `hold` job, any successive job that requires the `hold` job will run.
-      - integration_tests:
-          context: autotestaccount
-          requires:
-            - manual_approval

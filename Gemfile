@@ -11,5 +11,6 @@ group :development do
 end
 
 group :test do
-  gem 'codecov', require: false
+  gem 'simplecov', require: false
+  gem 'simplecov_json_formatter', require: false
 end

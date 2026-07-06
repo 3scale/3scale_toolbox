@@ -18,12 +18,16 @@ require 'pathname'
 require 'dotenv'
 Dotenv.load
 
-# Codecov
-require 'simplecov'
-SimpleCov.start
-if ENV['CI'] == 'true'
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+if ENV['COVERAGE'] && !ENV['COVERAGE'].empty?
+  require 'simplecov'
+  require 'simplecov_json_formatter'
+  SimpleCov.start do
+    formatter SimpleCov::Formatter::MultiFormatter.new([
+      SimpleCov::Formatter::JSONFormatter,
+      SimpleCov::Formatter::HTMLFormatter
+    ])
+    add_filter '/spec/'
+  end
 end
 
 require 'webmock/rspec'

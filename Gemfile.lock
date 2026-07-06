@@ -27,8 +27,6 @@ GEM
     base64 (0.2.0)
     bigdecimal (3.1.8)
     builder (3.2.4)
-    codecov (0.6.0)
-      simplecov (>= 0.15, < 0.22)
     coderay (1.1.3)
     concurrent-ruby (1.3.4)
     connection_pool (2.4.1)
@@ -124,13 +122,14 @@ PLATFORMS
 DEPENDENCIES
   3scale_toolbox!
   bundler
-  codecov
   dotenv
   license_finder (~> 7.2)
   pry
   rake (~> 13.0)
   rspec (~> 3.8)
   rubyzip (>= 1.3.0)
+  simplecov
+  simplecov_json_formatter
   webmock (~> 3.4)
 
 BUNDLED WITH
