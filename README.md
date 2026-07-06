@@ -2,7 +2,8 @@
 [![CircleCI](https://circleci.com/gh/3scale/3scale_toolbox.svg?style=svg)](https://circleci.com/gh/3scale/3scale_toolbox)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![GitHub release](https://img.shields.io/github/v/release/3scale/3scale_toolbox.svg)](https://github.com/3scale/3scale_toolbox/releases/latest)
-[![codecov](https://codecov.io/gh/3scale/3scale_toolbox/branch/main/graph/badge.svg?token=ojinl2NVv5)](https://codecov.io/gh/3scale/3scale_toolbox)
+[![Maintainability](https://qlty.sh/gh/3scale/projects/3scale_toolbox/maintainability.svg)](https://qlty.sh/gh/3scale/projects/3scale_toolbox)
+[![Code Coverage](https://qlty.sh/gh/3scale/projects/3scale_toolbox/coverage.svg)](https://qlty.sh/gh/3scale/projects/3scale_toolbox)
 
 ## Description
 3scale toolbox is a set of tools to help you manage your 3scale product. Using the [3scale API Ruby Client](https://github.com/3scale/3scale-api-ruby).
