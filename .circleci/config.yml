@@ -1,6 +1,9 @@
 ---
 version: 2.1
 
+orbs:
+  qlty: qltysh/qlty-orb@0.1.2
+
 ##################################### YAML ANCHORS  ############################################
 
 tag-trigger: &tag-trigger
@@ -18,20 +21,17 @@ commands:
       tag:
         type: string
     steps:
-      - run:
-          name: Upload << parameters.tag >> coverage to Qlty
-          command: |
-            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
-            ~/.qlty/bin/qlty coverage publish --tag << parameters.tag >> --incomplete coverage/.resultset.json
+      - qlty/coverage_publish:
+          files: coverage/.resultset.json
+          tag: << parameters.tag >>
+          incomplete: true
 
   complete-coverage:
     steps:
-      - run:
-          name: Mark coverage as complete
-          command: |
-            command -v ~/.qlty/bin/qlty || curl -sL https://qlty.sh | bash
-            ~/.qlty/bin/qlty coverage complete --tag unit
-            ~/.qlty/bin/qlty coverage complete --tag integration
+      - qlty/coverage_complete:
+          tag: unit
+      - qlty/coverage_complete:
+          tag: integration
 
   setup-bundler:
     steps:
@@ -150,10 +150,9 @@ jobs:
 
   finalize-coverage:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/base:stable
     working_directory: ~/repo
     steps:
-      - checkout
       - complete-coverage
 
   push-rubygems:

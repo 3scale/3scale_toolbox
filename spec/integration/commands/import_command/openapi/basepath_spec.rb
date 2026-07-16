@@ -26,7 +26,15 @@ RSpec.describe 'OpenAPI import basepath diff' do
   let(:response) do
     uri = URI("#{sandbox_host}#{path}")
     uri.query = URI.encode_www_form(api_key: api_key)
-    Net::HTTP.get_response(uri)
+    resp = nil
+    5.times do |i|
+      resp = Net::HTTP.get_response(uri)
+      break if resp.is_a?(Net::HTTPOK)
+
+      sleep 5
+      warn "basepath_spec: attempt #{i + 1} got #{resp.class}, retrying..."
+    end
+    resp
   end
 
   after :example do
