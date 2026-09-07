@@ -81,17 +81,7 @@
       </dependency>
           <dependency>
         <packageName>bundler</packageName>
-        <version>2.3.5</version>
-        <licenses>
-                      <license>
-              <name>MIT</name>
-              <url>http://opensource.org/licenses/mit-license</url>
-            </license>
-                  </licenses>
-      </dependency>
-          <dependency>
-        <packageName>codecov</packageName>
-        <version>0.6.0</version>
+        <version>4.0.16</version>
         <licenses>
                       <license>
               <name>MIT</name>
@@ -296,16 +286,6 @@
                   </licenses>
       </dependency>
           <dependency>
-        <packageName>mini_portile2</packageName>
-        <version>2.8.7</version>
-        <licenses>
-                      <license>
-              <name>MIT</name>
-              <url>http://opensource.org/licenses/mit-license</url>
-            </license>
-                  </licenses>
-      </dependency>
-          <dependency>
         <packageName>minitest</packageName>
         <version>5.25.1</version>
         <licenses>
@@ -415,7 +395,7 @@
       </dependency>
           <dependency>
         <packageName>rexml</packageName>
-        <version>3.3.6</version>
+        <version>3.3.9</version>
         <licenses>
                       <license>
               <name>Simplified BSD</name>
@@ -524,20 +504,6 @@
                       <license>
               <name>MIT</name>
               <url>http://opensource.org/licenses/mit-license</url>
-            </license>
-                  </licenses>
-      </dependency>
-          <dependency>
-        <packageName>strscan</packageName>
-        <version>3.1.0</version>
-        <licenses>
-                      <license>
-              <name>Simplified BSD</name>
-              <url>http://opensource.org/licenses/bsd-license</url>
-            </license>
-                      <license>
-              <name>ruby</name>
-              <url>http://www.ruby-lang.org/en/LICENSE.txt</url>
             </license>
                   </licenses>
       </dependency>
