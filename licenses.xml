@@ -331,7 +331,7 @@
       </dependency>
           <dependency>
         <packageName>nokogiri</packageName>
-        <version>1.16.7</version>
+        <version>1.19.4</version>
         <licenses>
                       <license>
               <name>MIT</name>
