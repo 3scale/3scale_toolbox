@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ruby-30
+FROM registry.access.redhat.com/ubi9/ruby-33
 MAINTAINER Eguzki Astiz Lezaun <eastizle@redhat.com>
 
 USER root
