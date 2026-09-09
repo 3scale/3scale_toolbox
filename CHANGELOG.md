@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Bumps ruby to 3.3 [#391](https://github.com/3scale/3scale_toolbox/pull/391)
+
 ## [1.0.1]
 
 ### Fixed

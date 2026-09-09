@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module ThreeScaleToolbox
   module OpenAPI
     ##

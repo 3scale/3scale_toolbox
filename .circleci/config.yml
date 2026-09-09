@@ -48,21 +48,20 @@ commands:
     steps:
       - restore_cache:
           keys:
-            - v3-dependencies-{{ checksum "Gemfile.lock" }}
+            - v4-dependencies-{{ checksum "Gemfile.lock" }}
             # fallback to using the latest cache if no exact match is found
-            - v3-dependencies
+            - v4-dependencies
 
       - run:
           name: Install dependencies
           command: |
-            # required for the license_finder
-            # The Gemfile.lock specifies nokogiri (1.14.0)
-            # but bundler would install native gem instead if not forced
+            # license_finder needs the ruby-platform gem variant (with source/metadata)
+            # to inspect licenses; native precompiled gems don't include that
             bundle config set --local force_ruby_platform true
             bundle install --jobs=3 --retry=3 --path vendor/bundle
 
       - save_cache:
-          key: v3-dependencies-{{ checksum "Gemfile.lock" }}
+          key: v4-dependencies-{{ checksum "Gemfile.lock" }}
           paths:
             - ./vendor/bundle
 
@@ -82,9 +81,9 @@ commands:
           docker_layer_caching: true
 
 jobs:
-  ruby-30-unittest:
+  ruby-33-unittest:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/ruby:3.3
     working_directory: ~/repo
     steps:
       - checkout
@@ -95,7 +94,7 @@ jobs:
 
   license_check:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/ruby:3.3
     working_directory: ~/repo
     steps:
       - checkout
@@ -108,7 +107,7 @@ jobs:
 
   help_test:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/ruby:3.3
     working_directory: ~/repo
     steps:
       - checkout
@@ -121,7 +120,7 @@ jobs:
 
   integration_tests:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/ruby:3.3
     working_directory: ~/repo
     steps:
       - checkout
@@ -157,7 +156,7 @@ jobs:
 
   push-rubygems:
     docker:
-      - image: cimg/ruby:3.0
+      - image: cimg/ruby:3.3
     working_directory: ~/repo
     steps:
       - checkout
@@ -193,7 +192,7 @@ workflows:
     jobs:
       - manual_approval:
           type: approval
-      - ruby-30-unittest:
+      - ruby-33-unittest:
           requires:
             - manual_approval
           filters:
@@ -219,14 +218,14 @@ workflows:
             - manual_approval
       - finalize-coverage:
           requires:
-            - ruby-30-unittest
+            - ruby-33-unittest
             - integration_tests
 
   main:
     when:
       equal: [ main, << pipeline.git.branch >> ]
     jobs:
-      - ruby-30-unittest:
+      - ruby-33-unittest:
           filters:
             <<: *tag-trigger
       - license_check:
@@ -242,11 +241,11 @@ workflows:
           context: autotestaccount
       - finalize-coverage:
           requires:
-            - ruby-30-unittest
+            - ruby-33-unittest
             - integration_tests
       - push-rubygems:
           requires:
-            - ruby-30-unittest
+            - ruby-33-unittest
             - license_check
             - help_test
           filters:
