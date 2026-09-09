@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Bumps nokogiri to 1.19.4 [#390](https://github.com/3scale/3scale_toolbox/pull/390)
 - Update licenses.xml [#389](https://github.com/3scale/3scale_toolbox/pull/389)
 - Bumps ruby to 3.3 [#391](https://github.com/3scale/3scale_toolbox/pull/391)
 
